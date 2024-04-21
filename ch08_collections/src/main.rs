@@ -1,4 +1,5 @@
 fn vectors() {
+    println!("=====VECTORS=====");
     // Using vec! macro to predefine vector
     let v = vec![1, 2, 3];
 
@@ -31,6 +32,7 @@ fn vectors() {
 }
 
 fn strings() {
+    println!("\n=====STRINGS=====");
     // Defining string
     let data = "initial contents"; // &str
     let s = data.to_string(); // String
@@ -75,7 +77,53 @@ fn strings() {
     }
 }
 
+fn hashmaps() {
+    println!("\n=====HASHMAPS=====");
+    use std::collections::HashMap;
+
+    // Initialize hash map
+    let mut scores = HashMap::new();
+    scores.insert(String::from("blue"), 10);
+    scores.insert(String::from("yellow"), 50);
+
+    // Get by key
+    let score = scores.get(&String::from("blue")).copied().unwrap_or(0);
+
+    // Iterate
+    for (key, value) in &scores {
+        println!("{key}: {value}");
+    }
+
+    // Ownership
+    let field_name = String::from("Favorite color");
+    let field_value = String::from("Blue");
+    let mut map = HashMap::new();
+    map.insert(field_name, field_value);
+    // field_name and field_value are invalid at this point, try using them and
+    // see what compiler error you get!
+    // println!("{}", field_name);
+
+    // Overwrite
+    scores.insert(String::from("blue"), 25);
+    println!("{:?}", scores);
+
+    // Add only if key doesn't exist
+    scores.entry(String::from("green")).or_insert(60);
+    scores.entry(String::from("blue")).or_insert(60);
+    println!("{:?}", scores);
+
+    // Update based on old value
+    let text = "hello world wonderful world";
+    let mut map = HashMap::new();
+    for word in text.split_whitespace() {
+        let count = map.entry(word).or_insert(0);
+        *count += 1; // Dereference
+    }
+    println!("{:?}", map)
+}
+
 fn main() {
     vectors();
     strings();
+    hashmaps();
 }
