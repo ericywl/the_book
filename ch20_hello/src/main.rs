@@ -12,13 +12,15 @@ fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     let pool = ThreadPool::build(4).unwrap();
 
-    for stream in listener.incoming() {
+    for stream in listener.incoming().take(2) {
         let stream = stream.unwrap();
 
         pool.execute(|| {
             handle_connection(stream);
         })
     }
+
+    println!("Shutting down.");
 }
 
 fn handle_connection(mut stream: TcpStream) {
@@ -33,6 +35,10 @@ fn handle_connection(mut stream: TcpStream) {
 
     let response = match &request_line[..] {
         "GET / HTTP/1.1" => response(200, "OK", "hello.html"),
+        "GET /sleep HTTP/1.1" => {
+            thread::sleep(Duration::from_secs(5));
+            response(404, "NOT FOUND", "404.html")
+        }
         _ => response(404, "NOT FOUND", "404.html"),
     };
 
@@ -40,7 +46,6 @@ fn handle_connection(mut stream: TcpStream) {
 }
 
 fn response(http_status_code: u16, reason: &str, filename: &str) -> String {
-    thread::sleep(Duration::from_secs(5));
     let status_line = format!("HTTP/1.1 {http_status_code} {reason}");
     let contents = fs::read_to_string(filename).unwrap();
     let length = contents.len();
